@@ -10,9 +10,9 @@ import SetupProfilePage from '../pages/auth/SetupProfilePage'
 // Main pages
 import HomePage from '../pages/home/HomePage'
 import CreateSplitPage from '../pages/split/CreateSplitPage'
+import SplitDetailPage from '../pages/split/SplitDetailPage'
 
 // Placeholder pages (to be implemented)
-const SplitDetailPage = () => <div className="p-8">Split Detail - Coming Soon</div>
 const GroupsPage = () => <div className="p-8">Groups - Coming Soon</div>
 const ActivityPage = () => <div className="p-8">Activity - Coming Soon</div>
 const WalletPage = () => <div className="p-8">Wallet - Coming Soon</div>
