@@ -25,16 +25,74 @@ function AppRoutes() {
       <Route path="/welcome" element={<WelcomePage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/verify-otp" element={<VerifyOtpPage />} />
-      <Route path="/setup-profile" element={<SetupProfilePage />} />
+
+      {/* Semi-protected (needs auth but not profile) */}
+      <Route
+        path="/setup-profile"
+        element={
+          <ProtectedRoute>
+            <SetupProfilePage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Protected routes */}
-      <Route path="/home" element={<HomePage />} />
-      <Route path="/split/create" element={<CreateSplitPage />} />
-      <Route path="/split/:id" element={<SplitDetailPage />} />
-      <Route path="/groups" element={<GroupsPage />} />
-      <Route path="/activity" element={<ActivityPage />} />
-      <Route path="/wallet" element={<WalletPage />} />
-      <Route path="/profile" element={<ProfilePage />} />
+      <Route
+        path="/home"
+        element={
+          <ProtectedRoute>
+            <HomePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/split/create"
+        element={
+          <ProtectedRoute>
+            <CreateSplitPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/split/:id"
+        element={
+          <ProtectedRoute>
+            <SplitDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/groups"
+        element={
+          <ProtectedRoute>
+            <GroupsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/activity"
+        element={
+          <ProtectedRoute>
+            <ActivityPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/wallet"
+        element={
+          <ProtectedRoute>
+            <WalletPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Default redirect */}
       <Route path="/" element={<Navigate to="/welcome" replace />} />
