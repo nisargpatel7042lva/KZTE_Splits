@@ -9,6 +9,11 @@ import { apiLimiter } from './middleware/rateLimit'
 
 // Import routes
 import authRoutes from './routes/auth'
+import splitsRoutes from './routes/splits'
+import groupsRoutes from './routes/groups'
+import walletRoutes from './routes/wallet'
+import transactionsRoutes from './routes/transactions'
+import contactsRoutes from './routes/contacts'
 
 const app = express()
 
@@ -31,6 +36,11 @@ app.get('/health', (req, res) => {
 
 // API routes (with rate limiting)
 app.use('/api/auth', authRoutes)
+app.use('/api/splits', splitsRoutes)
+app.use('/api/groups', groupsRoutes)
+app.use('/api/wallet', walletRoutes)
+app.use('/api/transactions', transactionsRoutes)
+app.use('/api/contacts', contactsRoutes)
 
 // 404 handler
 app.use(notFoundHandler)
