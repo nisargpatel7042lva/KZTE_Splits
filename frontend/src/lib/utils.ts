@@ -61,6 +61,17 @@ export function formatRelativeTime(date: Date | string): string {
 }
 
 /**
+ * Format date for display
+ */
+export function formatDate(date: Date | string): string {
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(new Date(date))
+}
+
+/**
  * Truncate wallet address
  */
 export function truncateAddress(address: string, chars: number = 4): string {
