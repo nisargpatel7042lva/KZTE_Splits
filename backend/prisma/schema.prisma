@@ -1,0 +1,270 @@
+// backend/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// AUTHENTICATION & USER MANAGEMENT
+// ============================================
+
+model User {
+  id            String    @id @default(uuid())
+  phone         String    @unique  // E.164 format: +7XXXXXXXXXX
+  name          String?   // Required after signup, can be null initially
+  avatar        String?   // URL to uploaded avatar
+  walletAddress String    @unique  // Solana public key
+  privateKey    String    // AES-256 encrypted Solana private key
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  sentSplits         Split[]              @relation("SplitCreator")
+  receivedSplits     SplitParticipant[]
+  groups             GroupMember[]
+  transactions       Transaction[]        @relation("UserTransactions")
+  bankAccounts       BankAccount[]
+  refreshTokens      RefreshToken[]
+  notifications      Notification[]
+
+  @@index([phone])
+  @@index([walletAddress])
+  @@map("users")
+}
+
+model OtpVerification {
+  id         String    @id @default(uuid())
+  phone      String    // E.164 format
+  code       String    // 6-digit code
+  expiresAt  DateTime  // 10 minutes from creation
+  attempts   Int       @default(0)  // Max 3 attempts
+  verified   Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+
+  @@index([phone, verified])
+  @@index([expiresAt])
+  @@map("otp_verifications")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  token     String    @unique  // JWT refresh token
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
+// ============================================
+// SPLITS & GROUP EXPENSES
+// ============================================
+
+enum SplitType {
+  EQUAL       // Split equally among all participants
+  CUSTOM      // Custom amounts per participant
+  PERCENTAGE  // Percentage-based split
+  EXACT       // Exact shares (I paid X, they paid Y)
+
+  @@map("split_type")
+}
+
+enum SplitStatus {
+  PENDING     // Waiting for payments
+  COMPLETED   // All participants paid
+  CANCELLED   // Split cancelled by creator
+
+  @@map("split_status")
+}
+
+model Split {
+  id          String      @id @default(uuid())
+  amount      Decimal     @db.Decimal(18, 2)  // Total split amount in KZTE
+  description String?     // Optional description
+  splitType   SplitType   // How to split the amount
+  paidBy      String      // User ID who paid initially
+  groupId     String?     // Optional: if part of a group
+  status      SplitStatus @default(PENDING)
+  txHash      String?     // Blockchain transaction hash when settled
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  creator      User                @relation("SplitCreator", fields: [paidBy], references: [id])
+  group        Group?              @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  participants SplitParticipant[]
+
+  @@index([paidBy])
+  @@index([groupId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("splits")
+}
+
+model SplitParticipant {
+  id        String    @id @default(uuid())
+  splitId   String
+  userId    String
+  amount    Decimal   @db.Decimal(18, 2)  // Amount this participant owes
+  paid      Boolean   @default(false)
+  paidAt    DateTime?
+  txHash    String?   // Transaction hash for this payment
+
+  // Relations
+  split     Split     @relation(fields: [splitId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id])
+
+  @@unique([splitId, userId])
+  @@index([userId, paid])
+  @@index([splitId])
+  @@map("split_participants")
+}
+
+// ============================================
+// GROUPS
+// ============================================
+
+model Group {
+  id          String    @id @default(uuid())
+  name        String    // e.g., "Friday Dinner Club"
+  avatar      String?   // Group photo URL
+  createdBy   String    // User ID of creator
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  members     GroupMember[]
+  splits      Split[]
+
+  @@index([createdBy])
+  @@map("groups")
+}
+
+enum GroupRole {
+  ADMIN   // Can edit group, add/remove members
+  MEMBER  // Regular member
+
+  @@map("group_role")
+}
+
+model GroupMember {
+  id       String     @id @default(uuid())
+  groupId  String
+  userId   String
+  role     GroupRole  @default(MEMBER)
+  joinedAt DateTime   @default(now())
+
+  // Relations
+  group    Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@index([userId])
+  @@map("group_members")
+}
+
+// ============================================
+// TRANSACTIONS & BLOCKCHAIN
+// ============================================
+
+enum TransactionType {
+  SPLIT_PAYMENT    // Payment for a split
+  ADD_FUNDS        // User added funds to wallet
+  CASH_OUT         // User cashed out to bank
+  TRANSFER         // Direct transfer between users
+
+  @@map("transaction_type")
+}
+
+enum TransactionStatus {
+  PENDING    // Submitted to blockchain
+  CONFIRMED  // Confirmed on blockchain
+  FAILED     // Transaction failed
+
+  @@map("transaction_status")
+}
+
+model Transaction {
+  id              String            @id @default(uuid())
+  fromUserId      String?           // Null for ADD_FUNDS
+  toUserId        String?           // Null for CASH_OUT
+  amount          Decimal           @db.Decimal(18, 2)
+  type            TransactionType
+  status          TransactionStatus @default(PENDING)
+  txHash          String?           @unique  // Solana transaction signature
+  splitId         String?           // If related to a split
+  metadata        Json?             // Additional data (bank details, notes, etc.)
+  errorMessage    String?           // If failed, why?
+  createdAt       DateTime          @default(now())
+  confirmedAt     DateTime?         // When blockchain confirmed
+
+  // Relations
+  fromUser        User?             @relation("UserTransactions", fields: [fromUserId], references: [id])
+
+  @@index([fromUserId])
+  @@index([toUserId])
+  @@index([txHash])
+  @@index([type, status])
+  @@index([createdAt])
+  @@map("transactions")
+}
+
+// ============================================
+// BANK ACCOUNTS & PAYOUTS
+// ============================================
+
+model BankAccount {
+  id             String   @id @default(uuid())
+  userId         String
+  bankName       String   // e.g., "Kaspi Bank", "Halyk Bank"
+  accountNumber  String   // Bank account number
+  accountHolder  String   // Name on account
+  isDefault      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  // Relations
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("bank_accounts")
+}
+
+// ============================================
+// NOTIFICATIONS
+// ============================================
+
+enum NotificationType {
+  SPLIT_REQUEST     // Someone requested money from you
+  SPLIT_PAID        // Someone paid you
+  GROUP_INVITE      // Invited to group
+  PAYMENT_RECEIVED  // Direct payment received
+
+  @@map("notification_type")
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  read      Boolean          @default(false)
+  metadata  Json?            // Additional context (splitId, groupId, etc.)
+  createdAt DateTime         @default(now())
+
+  // Relations
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([createdAt])
+  @@map("notifications")
+}
