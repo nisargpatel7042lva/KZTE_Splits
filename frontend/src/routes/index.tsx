@@ -65,7 +65,23 @@ function AppRoutes() {
         path="/groups"
         element={
           <ProtectedRoute>
-            <GroupsPage />
+            <GroupsListPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/groups/create"
+        element={
+          <ProtectedRoute>
+            <CreateGroupPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/groups/:id"
+        element={
+          <ProtectedRoute>
+            <GroupDetailPage />
           </ProtectedRoute>
         }
       />
