@@ -11,12 +11,12 @@ import SetupProfilePage from '../pages/auth/SetupProfilePage'
 import HomePage from '../pages/home/HomePage'
 import CreateSplitPage from '../pages/split/CreateSplitPage'
 import SplitDetailPage from '../pages/split/SplitDetailPage'
-
-// Placeholder pages (to be implemented)
-const GroupsPage = () => <div className="p-8">Groups - Coming Soon</div>
-const ActivityPage = () => <div className="p-8">Activity - Coming Soon</div>
-const WalletPage = () => <div className="p-8">Wallet - Coming Soon</div>
-const ProfilePage = () => <div className="p-8">Profile - Coming Soon</div>
+import GroupsListPage from '../pages/groups/GroupsListPage'
+import CreateGroupPage from '../pages/groups/CreateGroupPage'
+import GroupDetailPage from '../pages/groups/GroupDetailPage'
+import ActivityPage from '../pages/activity/ActivityPage'
+import WalletPage from '../pages/wallet/WalletPage'
+import ProfilePage from '../pages/profile/ProfilePage'
 
 function AppRoutes() {
   return (
