@@ -1,11 +1,16 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { ProtectedRoute } from '../components/ProtectedRoute'
 
-// Placeholder pages - will be implemented
-const WelcomePage = () => <div className="p-8">Welcome Page - Coming Soon</div>
-const LoginPage = () => <div className="p-8">Login Page - Coming Soon</div>
-const VerifyOtpPage = () => <div className="p-8">Verify OTP - Coming Soon</div>
-const SetupProfilePage = () => <div className="p-8">Setup Profile - Coming Soon</div>
-const HomePage = () => <div className="p-8">Home Dashboard - Coming Soon</div>
+// Auth pages
+import WelcomePage from '../pages/auth/WelcomePage'
+import LoginPage from '../pages/auth/LoginPage'
+import VerifyOtpPage from '../pages/auth/VerifyOtpPage'
+import SetupProfilePage from '../pages/auth/SetupProfilePage'
+
+// Main pages
+import HomePage from '../pages/home/HomePage'
+
+// Placeholder pages (to be implemented)
 const CreateSplitPage = () => <div className="p-8">Create Split - Coming Soon</div>
 const SplitDetailPage = () => <div className="p-8">Split Detail - Coming Soon</div>
 const GroupsPage = () => <div className="p-8">Groups - Coming Soon</div>
