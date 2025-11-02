@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { AuthenticatedRequest } from '../types'
 import { prisma } from '../lib/prisma'
 import { generateOTP, sendOTP, validatePhoneNumber } from '../services/sms'
+import { config } from '../config'
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../services/jwt'
 import { createWallet } from '../services/blockchain'
 
@@ -69,15 +70,32 @@ export async function sendOtpHandler(
       },
     })
 
-    // Send OTP via SMS
-    const sent = await sendOTP(phone, code)
+    // Send OTP via SMS (wrap to capture provider errors for debugging)
+    try {
+      const sent = await sendOTP(phone, code)
 
-    if (!sent) {
+      if (!sent) {
+        return res.status(500).json({
+          success: false,
+          error: {
+            code: 'SMS_SEND_FAILED',
+            message:
+              config.nodeEnv === 'development'
+                ? 'Failed to send OTP (unknown provider error). Check server logs.'
+                : 'Failed to send OTP. Please try again.',
+          },
+        })
+      }
+    } catch (err: any) {
+      console.error('sendOTP error (caught in controller):', err)
       return res.status(500).json({
         success: false,
         error: {
           code: 'SMS_SEND_FAILED',
-          message: 'Failed to send OTP. Please try again.',
+          message:
+            config.nodeEnv === 'development'
+              ? err?.message || String(err)
+              : 'Failed to send OTP. Please try again.',
         },
       })
     }
