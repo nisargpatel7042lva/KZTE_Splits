@@ -377,3 +377,6 @@ MIT License - Built for Superteam KZ and Intebix bounty program.
 **Built with ❤️ for Kazakhstan's digital economy**
 
 🚀 **Ready to split bills instantly with KZTE!**
+
+
+
