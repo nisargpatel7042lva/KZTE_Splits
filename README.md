@@ -133,11 +133,12 @@ JWT_SECRET=your-256-bit-secret-key
 JWT_ACCESS_EXPIRY=15m
 JWT_REFRESH_EXPIRY=7d
 
-# AWS SNS (for OTP)
-AWS_ACCESS_KEY_ID=your-aws-access-key
-AWS_SECRET_ACCESS_KEY=your-aws-secret-key
-AWS_REGION=ap-northeast-1
-AWS_SNS_SENDER_ID=KZTE
+# Twilio (for OTP SMS)
+TWILIO_ACCOUNT_SID=your-twilio-account-sid
+TWILIO_AUTH_TOKEN=your-twilio-auth-token
+# Either use a verified sender phone number or a Messaging Service SID
+TWILIO_FROM_NUMBER=+1XXXXXXXXXX
+TWILIO_MESSAGING_SERVICE_SID=MGXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 # Solana
 SOLANA_RPC_URL=https://api.devnet.solana.com

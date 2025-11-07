@@ -1,12 +1,13 @@
-import AWS from 'aws-sdk'
+import twilio from 'twilio'
 import { config } from '../config'
 
-// Configure AWS SNS
-const sns = new AWS.SNS({
-  accessKeyId: config.aws.accessKeyId,
-  secretAccessKey: config.aws.secretAccessKey,
-  region: config.aws.region,
-})
+// Configure Twilio client (lazy to avoid constructing in tests when not needed)
+function getTwilioClient() {
+  if (!config.twilio.accountSid || !config.twilio.authToken) {
+    throw new Error('Twilio credentials are not configured')
+  }
+  return twilio(config.twilio.accountSid, config.twilio.authToken)
+}
 
 /**
  * Generate a random 6-digit OTP code
@@ -16,7 +17,7 @@ export function generateOTP(): string {
 }
 
 /**
- * Send OTP via AWS SNS
+ * Send OTP via Twilio SMS
  * @param phoneNumber - Phone number in E.164 format
  * @param code - 6-digit OTP code
  * @returns Promise<boolean> - Success status
@@ -26,22 +27,7 @@ export async function sendOTP(
   code: string
 ): Promise<boolean> {
   try {
-    const message = `Your KZTE Splits verification code is: ${code}. Valid for 10 minutes.`
-
-    const params: AWS.SNS.PublishInput = {
-      Message: message,
-      PhoneNumber: phoneNumber,
-      MessageAttributes: {
-        'AWS.SNS.SMS.SenderID': {
-          DataType: 'String',
-          StringValue: config.aws.snsSenderId,
-        },
-        'AWS.SNS.SMS.SMSType': {
-          DataType: 'String',
-          StringValue: 'Transactional',
-        },
-      },
-    }
+    const body = `Your KZTE Splits verification code is: ${code}. Valid for 10 minutes.`
 
     // In development mode, just log the OTP instead of sending
     if (config.nodeEnv === 'development') {
@@ -49,7 +35,23 @@ export async function sendOTP(
       return true
     }
 
-    await sns.publish(params).promise()
+    const client = getTwilioClient()
+
+    // Prefer Messaging Service SID if configured, else use fromNumber
+    const messagingOptions: any = {
+      to: phoneNumber,
+      body,
+    }
+
+    if (config.twilio.messagingServiceSid) {
+      messagingOptions.messagingServiceSid = config.twilio.messagingServiceSid
+    } else if (config.twilio.fromNumber) {
+      messagingOptions.from = config.twilio.fromNumber
+    } else {
+      throw new Error('Twilio from number or messaging service SID is required')
+    }
+
+    await client.messages.create(messagingOptions)
     return true
   } catch (error) {
     console.error('Error sending OTP:', error)

@@ -24,6 +24,14 @@ export const config = {
     snsSenderId: process.env.AWS_SNS_SENDER_ID || 'KZTE',
   },
 
+  // Twilio
+  twilio: {
+    accountSid: process.env.TWILIO_ACCOUNT_SID || '',
+    authToken: process.env.TWILIO_AUTH_TOKEN || '',
+    fromNumber: process.env.TWILIO_FROM_NUMBER || '',
+    messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID || '',
+  },
+
   // Solana
   solana: {
     rpcUrl: process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com',
