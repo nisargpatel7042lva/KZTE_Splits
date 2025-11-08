@@ -75,7 +75,7 @@ KZTE_Splits/
 - **Framework:** Express.js
 - **Database:** PostgreSQL
 - **ORM:** Prisma
-- **Authentication:** JWT + OTP (AWS SNS)
+- **Authentication:** JWT + OTP (Twilio SMS)
 - **Blockchain:** Solana Web3.js + SPL Token
 - **Validation:** Zod
 - **Security:** Helmet, CORS, Rate Limiting
@@ -93,7 +93,7 @@ KZTE_Splits/
 
 - Node.js 18+ and npm 9+
 - PostgreSQL database
-- AWS account (for SMS/OTP via SNS)
+- Twilio account (for SMS/OTP)
 - Solana wallet (for testing)
 
 ### 1. Clone Repository

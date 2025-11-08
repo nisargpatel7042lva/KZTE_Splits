@@ -16,14 +16,6 @@ export const config = {
   jwtAccessExpiry: process.env.JWT_ACCESS_EXPIRY || '15m',
   jwtRefreshExpiry: process.env.JWT_REFRESH_EXPIRY || '7d',
 
-  // AWS
-  aws: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
-    region: process.env.AWS_REGION || 'ap-northeast-1',
-    snsSenderId: process.env.AWS_SNS_SENDER_ID || 'KZTE',
-  },
-
   // Twilio
   twilio: {
     accountSid: process.env.TWILIO_ACCOUNT_SID || '',

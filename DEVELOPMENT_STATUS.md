@@ -26,7 +26,7 @@
 - ✅ Cascade delete rules
 
 #### Authentication System
-- ✅ Phone-based OTP authentication (AWS SNS)
+- ✅ Phone-based OTP authentication (Twilio SMS)
 - ✅ JWT token generation and verification
 - ✅ Refresh token rotation
 - ✅ Auth middleware for protected routes
@@ -86,7 +86,7 @@
 - ✅ GET /api/contacts - Get split contacts
 
 #### Services & Utilities
-- ✅ SMS/OTP service (AWS SNS)
+- ✅ SMS/OTP service (Twilio)
 - ✅ JWT token service
 - ✅ Blockchain service (Solana)
 - ✅ Split calculation service
@@ -292,7 +292,7 @@ npx prisma migrate dev
 ### Testing Environment
 - Use Solana Devnet for development
 - OTP codes logged to console in dev mode
-- No AWS credentials needed for local development
+- No Twilio credentials needed for local development (OTP logged to console)
 
 ---
 
